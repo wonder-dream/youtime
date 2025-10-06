@@ -72,9 +72,11 @@ class DatabaseConnection:
     def __enter__(self):
         self.connection = get_db_connection()
         if not self.connection:
+            print("无法获取数据库连接")
             return None, None
         self.cursor = get_db_cursor(self.connection)
         if not self.cursor:
+            print("无法获取数据库游标")
             close_db_resources(self.connection)
             return None, None
         return self.connection, self.cursor
