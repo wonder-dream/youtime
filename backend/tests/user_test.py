@@ -1,8 +1,8 @@
 import requests, json
-base = "http://127.0.0.1:5000/api"
+base = "http://127.0.0.1:5000/api/users"
 
 resp = requests.post(
-    f"{base}/users",
+    f"{base}",
     json={"username": "alice", "email": "a@b.com", "password": "secret"}
 )
 print("register:", resp.status_code, resp.text)

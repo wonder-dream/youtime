@@ -2,11 +2,11 @@ from flask import Blueprint, jsonify, request
 from ..db import DatabaseConnection
 from werkzeug.security import check_password_hash, generate_password_hash
 
-bp = Blueprint("users", __name__, url_prefix="/api/users")
+user_bp = Blueprint("users", __name__, url_prefix="/api/users")
 
 
 # 获取所有用户
-@bp.route("/users", methods=["GET"])
+@user_bp.route("/", methods=["GET"])
 def get_users():
     with DatabaseConnection() as (conn, cursor):
         if not conn or not cursor:
@@ -17,7 +17,7 @@ def get_users():
 
 
 # 创建用户
-@bp.route("/users", methods=["POST"])
+@user_bp.route("/", methods=["POST"])
 def create_user():
     data = request.get_json()
     username = data.get("username")
@@ -40,7 +40,7 @@ def create_user():
     return jsonify({"message": "用户创建成功"}), 201
 
 
-@bp.route("login", methods=["POST"])
+@user_bp.route("/login", methods=["POST"])
 def login():
     data = request.get_json()
     username = data.get("username")
@@ -69,6 +69,6 @@ def login():
 
 
 # ping测试接口
-@bp.route("/ping", methods=["GET"])
+@user_bp.route("/ping", methods=["GET"])
 def ping():
     return jsonify({"message": "pong!"})
