@@ -1,32 +1,41 @@
-import requests, json
+import requests
 
-base = "http://127.0.0.1:5000/api/tasks"
-user_id = 1
+base_users = "http://127.0.0.1:5000/api/users"
+base_tasks = "http://127.0.0.1:5000/api/tasks"
 
-resp = requests.post(
-    f"{base}/",
+session = requests.Session()
+
+resp = session.post(
+    f"{base_users}/login",
+    json={"username": "alice", "password": "secret"},
+)
+print("login:", resp.status_code, resp.text)
+
+resp = session.post(
+    f"{base_tasks}/",
     json={
         "title": "Test Task",
         "description": "This is a test task.",
-        "user_id": user_id,
+        "status": "0",
+        "priority": "1",
     },
 )
 print("create:", resp.status_code, resp.text)
 
-resp = requests.get(f"{base}/", params={"user_id": user_id})
+resp = session.get(f"{base_tasks}/")
 print("get:", resp.status_code, resp.text)
 
 tasks = resp.json() if resp.ok else []
 task_id = tasks[0]["id"] if tasks else None
 
 if task_id:
-    resp = requests.put(
-        f"{base}/{task_id}",
-        json={"title": "Updated Task", "description": "This is an updated test task."},
+    resp = session.put(
+        f"{base_tasks}/{task_id}",
+        json={"title": "Updated Task"},
     )
     print("update:", resp.status_code, resp.text)
 
-    resp = requests.delete(f"{base}/{task_id}")
+    resp = session.delete(f"{base_tasks}/{task_id}")
     print("delete:", resp.status_code, resp.text)
 else:
     print("update: skipped (no task id)")

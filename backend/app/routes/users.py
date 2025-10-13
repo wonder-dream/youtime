@@ -1,4 +1,5 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, session
+
 from ..db import DatabaseConnection
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -57,6 +58,7 @@ def login():
         row = cursor.fetchone()
     if not row or not check_password_hash(row["password_hash"], password):
         return jsonify({"error": "无效的用户名或密码"}), 401
+    session["user_id"] = row["id"]
     return (
         jsonify(
             {
@@ -66,9 +68,15 @@ def login():
         ),
         200,
     )
-
+@user_bp.route("/logout", methods=["POST"])
+def logout():
+    session.pop("user_id", None)
+    return jsonify({"message": "退出登录成功"}), 200
 
 # ping测试接口
 @user_bp.route("/ping", methods=["GET"])
 def ping():
     return jsonify({"message": "pong!"})
+
+
+
