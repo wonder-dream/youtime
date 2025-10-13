@@ -6,9 +6,11 @@ from werkzeug.security import check_password_hash, generate_password_hash
 user_bp = Blueprint("users", __name__, url_prefix="/api/users")
 
 
-# 获取所有用户
 @user_bp.route("/", methods=["GET"])
 def get_users():
+    """
+    获取所有用户（仅用于测试，实际应用中应移除或保护此接口）
+    """
     with DatabaseConnection() as (conn, cursor):
         if not conn or not cursor:
             return jsonify({"error": "数据库连接失败"}), 500
@@ -17,13 +19,21 @@ def get_users():
         return jsonify(users), 200
 
 
-# 创建用户
 @user_bp.route("/", methods=["POST"])
 def create_user():
+    """
+    创建新用户
+    期望的JSON负载格式:
+    {
+        "username": "exampleuser",
+        "email": "example@example.com",
+        "password": "examplepass"
+    }
+    """
     data = request.get_json()
     username = data.get("username")
     email = data.get("email")
-    password = data.get("password")  # 之后记得加哈希，别明文存储
+    password = data.get("password")  # 明文密码
 
     if not username or not email or not password:
         return jsonify({"error": "缺少必要字段"}), 400
@@ -40,9 +50,11 @@ def create_user():
         conn.commit()
     return jsonify({"message": "用户创建成功"}), 201
 
-
 @user_bp.route("/login", methods=["POST"])
 def login():
+    """
+    用户登录
+    """
     data = request.get_json()
     username = data.get("username")
     password = data.get("password")
@@ -68,14 +80,20 @@ def login():
         ),
         200,
     )
+
 @user_bp.route("/logout", methods=["POST"])
 def logout():
+    """
+    用户登出
+    """
     session.pop("user_id", None)
     return jsonify({"message": "退出登录成功"}), 200
-
-# ping测试接口
+    
 @user_bp.route("/ping", methods=["GET"])
 def ping():
+    """
+    ping测试接口
+    """
     return jsonify({"message": "pong!"})
 
 

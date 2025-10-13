@@ -8,6 +8,8 @@ task_bp = Blueprint("tasks", __name__, url_prefix="/api/tasks")
 def get_tasks():
     """
     获取所有任务
+    仅返回未删除的任务
+    需要用户登录,依赖session中的user_id
     """
     user_id = session.get("user_id")
     if not user_id:
@@ -29,6 +31,14 @@ def get_tasks():
 def create_task():
     """
     创建新任务
+    期望的JSON负载格式:
+    {
+        "title": "任务标题",
+        "description": "任务描述",
+        "status": "0",  # 0: 未开始, 1: 进行中, 2: 已完成
+        "priority": "1",  # 0: 低, 1: 中, 2: 高, 3: 紧急
+        "due_date": "2024-12-31"
+    }
     """
     user_id = session.get("user_id")
     if not user_id:
@@ -61,6 +71,15 @@ def create_task():
 def update_task(task_id):
     """
     更新任务
+    只更新提供的字段
+    期望的JSON负载格式:
+    {
+        "title": "new title",          # 可选
+        "description": "new description",  # 可选
+        "status": "1",                 # 可选
+        "priority": "2",               # 可选
+        "due_date": "2024-12-31"      # 可选
+    }
     """
     user_id = session.get("user_id")
     if not user_id:
@@ -134,6 +153,9 @@ def delete_task(task_id):
 
 @task_bp.route("/<int:task_id>/purge", methods=["DELETE"])
 def purge_task(task_id):
+    """
+    彻底删除任务
+    """
     user_id = session.get("user_id")
     if not user_id:
         return jsonify({"error": "未登录"}), 401
