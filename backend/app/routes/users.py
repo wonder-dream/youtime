@@ -88,7 +88,24 @@ def logout():
     """
     session.pop("user_id", None)
     return jsonify({"message": "退出登录成功"}), 200
-    
+
+@user_bp.route("/delete", methods=["POST"])
+def delete_user():
+    """
+    删除当前登录用户
+    """
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({"error": "未登录"}), 401
+
+    with DatabaseConnection() as (conn, cursor):
+        if not conn or not cursor:
+            return jsonify({"error": "数据库连接失败"}), 500
+        cursor.execute("DELETE FROM users WHERE id = %s", (user_id,))
+        conn.commit()
+    session.pop("user_id", None)
+    return jsonify({"message": "用户删除成功"}), 200
+
 @user_bp.route("/ping", methods=["GET"])
 def ping():
     """
